@@ -37,6 +37,12 @@ async function run() {
     const db = client.db('plate_db');
     const foodsCollection = db.collection('foods');
 
+    // read api on food collection
+    app.get('/foods', async(req, res) => {
+        const cursor = foodsCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+    })
 
     // Create api on food collection
     app.post('/foods', async(req, res) => {
