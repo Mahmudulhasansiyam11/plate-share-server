@@ -44,6 +44,14 @@ async function run() {
         res.send(result);
     })
 
+    // read single document on food collection
+    app.get('/foods/:id', async(req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await foodsCollection.findOne(query);
+        res.send(result);
+    })
+
     // Create api on food collection
     app.post('/foods', async(req, res) => {
         const newFood = req.body;
