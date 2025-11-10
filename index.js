@@ -45,6 +45,18 @@ async function run() {
         res.send(result);
     })
 
+    // update api on food collection
+    app.patch('/foods/:id', async(req, res) => {
+        const id = req.params.id;
+        const updatedFood = req.body;
+        const query = { _id: new ObjectId(id) };
+        const update = {
+            $set: updatedFood
+        }
+        const result = await foodsCollection.updateOne(query, update);
+        res.send(result);
+    })
+
     // delete api on food collection
     app.delete('/foods/:id', async(req, res) => {
         const id = req.params.id;
