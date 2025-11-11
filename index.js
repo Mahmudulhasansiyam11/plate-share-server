@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-require('dotenv').config(); 
+require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -9,9 +9,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.o2upin6.mongodb.net/?appName=Cluster0`;
-
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -26,98 +24,112 @@ app.get("/", (req, res) => {
   res.send("plate server is running");
 });
 
-
-
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const db = client.db("plate_db");
+    const foodsCollection = db.collection("foods");
+    const requestsCollection = db.collection("requests");
+    const usersCollection = db.collection("users");
 
-    const db = client.db('plate_db');
-    const foodsCollection = db.collection('foods');
-    const requestsCollection = db.collection('requests');
+    // user collection api
+    // post api on user collection
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
 
-    // read api on food collection
-    app.get('/foods', async(req, res) => {
-
-        console.log(req.query);
-        const email = req.query.email;
-        const query = {};
-        if(email){
-            query.donator_email = email;
-        }        
-
-
-        const cursor = foodsCollection.find(query);
-        const result = await cursor.toArray();
+      const email = req.body.email;
+      const query = { email: email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        res.send({ message: 'user already exits. do not need to insert again' });
+      } else {
+        const result = await usersCollection.insertOne(newUser);
         res.send(result);
-    })
+      }
+    });
+
+    // food collection apis
+    // read api on food collection
+    app.get("/foods", async (req, res) => {
+      console.log(req.query);
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.donator_email = email;
+      }
+
+      const cursor = foodsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // read single document on food collection
-    app.get('/foods/:id', async(req, res) => {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) };
-        const result = await foodsCollection.findOne(query);
-        res.send(result);
-    })
+    app.get("/foods/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodsCollection.findOne(query);
+      res.send(result);
+    });
 
     // Create api on food collection
-    app.post('/foods', async(req, res) => {
-        const newFood = req.body;
-        const result = await foodsCollection.insertOne(newFood);
-        res.send(result);
-    })
+    app.post("/foods", async (req, res) => {
+      const newFood = req.body;
+      const result = await foodsCollection.insertOne(newFood);
+      res.send(result);
+    });
 
     // update api on food collection
-    app.patch('/foods/:id', async(req, res) => {
-        const id = req.params.id;
-        const updatedFood = req.body;
-        const query = { _id: new ObjectId(id) };
-        const update = {
-            $set: updatedFood
-        }
-        const result = await foodsCollection.updateOne(query, update);
-        res.send(result);
-    })
+    app.patch("/foods/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedFood = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: updatedFood,
+      };
+      const result = await foodsCollection.updateOne(query, update);
+      res.send(result);
+    });
 
     // delete api on food collection
-    app.delete('/foods/:id', async(req, res) => {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) };
-        const result = await foodsCollection.deleteOne(query);
-        res.send(result);
-    })
+    app.delete("/foods/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodsCollection.deleteOne(query);
+      res.send(result);
+    });
 
     // highest food quantity data
-    app.get('/highest-food', async(req, res) => {
-        const cursor = foodsCollection.find().sort({ quantity_number: -1 }).limit(6);
-        const result = await cursor.toArray();
-        res.send(result);
-    })
-
+    app.get("/highest-food", async (req, res) => {
+      const cursor = foodsCollection
+        .find()
+        .sort({ quantity_number: -1 })
+        .limit(6);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // requests related apis
     // read api on requests collection
-    app.get('/requests', async(req, res) => {
+    app.get("/requests", async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.donator_email = email;
+      }
 
-        const email = req.query.email;
-        const query = {};
-        if(email){
-            query.donator_email = email;
-        }
-
-        const cursor = requestsCollection.find(query);
-        const result = await cursor.toArray();
-        res.send(result);
-    })
+      const cursor = requestsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // Post
-    app.post('/requests', async(req, res) => {
-        const newRequest = req.body;
-        const result = await requestsCollection.insertOne(newRequest);
-        req.send(result);
-    })
+    app.post("/requests", async (req, res) => {
+      const newRequest = req.body;
+      const result = await requestsCollection.insertOne(newRequest);
+      req.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
