@@ -79,6 +79,13 @@ async function run() {
         res.send(result);
     })
 
+    // highest food quantity data
+    app.get('/highest-food', async(req, res) => {
+        const cursor = foodsCollection.find().sort({ quantity_number: -1 }).limit(6);
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
