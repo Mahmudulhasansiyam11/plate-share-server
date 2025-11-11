@@ -124,11 +124,20 @@ async function run() {
       res.send(result);
     });
 
+    // get request for a single food
+    app.get('/foods/requests/:foodId', async(req, res) => {
+        const foodId = req.params.foodId;
+        const query = { food_id: foodId };
+        const cursor = requestsCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+
     // Post
     app.post("/requests", async (req, res) => {
       const newRequest = req.body;
       const result = await requestsCollection.insertOne(newRequest);
-      req.send(result);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
