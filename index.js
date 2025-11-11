@@ -39,7 +39,16 @@ async function run() {
 
     // read api on food collection
     app.get('/foods', async(req, res) => {
-        const cursor = foodsCollection.find();
+
+        console.log(req.query);
+        const email = req.query.email;
+        const query = {};
+        if(email){
+            query.donator_email = email;
+        }        
+
+
+        const cursor = foodsCollection.find(query);
         const result = await cursor.toArray();
         res.send(result);
     })
