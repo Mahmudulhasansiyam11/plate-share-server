@@ -36,6 +36,7 @@ async function run() {
 
     const db = client.db('plate_db');
     const foodsCollection = db.collection('foods');
+    const requestsCollection = db.collection('requests');
 
     // read api on food collection
     app.get('/foods', async(req, res) => {
@@ -91,6 +92,14 @@ async function run() {
     // highest food quantity data
     app.get('/highest-food', async(req, res) => {
         const cursor = foodsCollection.find().sort({ quantity_number: -1 }).limit(6);
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+
+
+    // requests related apis
+    app.get('/requests', async(req, res) => {
+        const cursor = requestsCollection.find();
         const result = await cursor.toArray();
         res.send(result);
     })
