@@ -156,10 +156,20 @@ async function run() {
       res.send(result);
     });
 
-    // Post
+    // Post api on request collection
     app.post("/requests", async (req, res) => {
       const newRequest = req.body;
       const result = await requestsCollection.insertOne(newRequest);
+      res.send(result);
+    });
+
+    // delete api on request collection
+
+    app.delete("/requests/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await requestsCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
       res.send(result);
     });
 
