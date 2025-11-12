@@ -43,7 +43,9 @@ async function run() {
       const query = { email: email };
       const existingUser = await usersCollection.findOne(query);
       if (existingUser) {
-        res.send({ message: 'user already exits. do not need to insert again' });
+        res.send({
+          message: "user already exits. do not need to insert again",
+        });
       } else {
         const result = await usersCollection.insertOne(newUser);
         res.send(result);
@@ -125,13 +127,34 @@ async function run() {
     });
 
     // get request for a single food
-    app.get('/foods/requests/:foodId', async(req, res) => {
-        const foodId = req.params.foodId;
-        const query = { food_id: foodId };
-        const cursor = requestsCollection.find(query);
-        const result = await cursor.toArray();
-        res.send(result);
-    })
+    app.get("/foods/requests/:foodId", async (req, res) => {
+      const foodId = req.params.foodId;
+      const query = { food_id: foodId };
+      const cursor = requestsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // update request for a single food status
+    app.patch("/requests/:id", async (req, res) => {
+      const id = req.params.id;
+      const { food_status } = req.body;
+      const result = await requestsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { food_status } }
+      );
+      res.send(result);
+    });
+
+    app.patch("/foods/:id", async (req, res) => {
+      const id = req.params.id;
+      const { food_status } = req.body;
+      const result = await foodsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { food_status } }
+      );
+      res.send(result);
+    });
 
     // Post
     app.post("/requests", async (req, res) => {
